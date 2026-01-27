@@ -53,7 +53,7 @@ export default function Home() {
               Create Giveaway
             </Link>
           ) : (
-            <div className="card max-w-sm mx-auto">
+            <div className="card max-w-sm mx-auto relative z-[60]">
               <p className="text-base-gray-300 mb-4">Connect your wallet to get started</p>
               <WalletConnect />
             </div>

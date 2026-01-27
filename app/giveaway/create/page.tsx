@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useAccount, useWriteContract, useWaitForTransactionReceipt, useSendTransaction } from 'wagmi';
+import { useAccount, useWriteContract, useWaitForTransactionReceipt, useSendTransaction, useSwitchChain, useChainId } from 'wagmi';
+import { base } from 'wagmi/chains';
 import { parseUnits, parseEther } from 'viem';
 import { NATIVE_ETH_ADDRESS } from '@/lib/alchemy';
 import { TokenSelector } from '@/components/giveaway/TokenSelector';
@@ -20,12 +21,17 @@ type ParticipantTab = 'manual' | 'csv' | 'farcaster';
 export default function CreateGiveaway() {
   const router = useRouter();
   const { address, isConnected } = useAccount();
+  const chainId = useChainId();
+  const { switchChainAsync } = useSwitchChain();
   const { writeContract, data: txHash } = useWriteContract();
   const { sendTransaction, data: ethTxHash } = useSendTransaction();
   const pendingHash = txHash || ethTxHash;
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
     hash: pendingHash,
   });
+
+  // Target chain for transactions (Base mainnet)
+  const targetChainId = base.id;
 
   // Track confirmed transaction hash for success screen
   const [confirmedTxHash, setConfirmedTxHash] = useState<string>();
@@ -60,6 +66,10 @@ export default function CreateGiveaway() {
   const [isDrawing, setIsDrawing] = useState(false);
   const [winners, setWinners] = useState<Participant[]>([]);
   const [transferring, setTransferring] = useState(false);
+  const [switchingChain, setSwitchingChain] = useState(false);
+
+  // Check if on wrong chain
+  const isWrongChain = mounted && chainId !== targetChainId;
 
   const handleAddParticipant = (participant: ParticipantInputType) => {
     setParticipants([...participants, participant]);
@@ -104,6 +114,16 @@ export default function CreateGiveaway() {
     setTransferring(true);
 
     try {
+      // Ensure we're on the correct chain before sending transactions
+      if (chainId !== targetChainId) {
+        setSwitchingChain(true);
+        try {
+          await switchChainAsync({ chainId: targetChainId });
+        } finally {
+          setSwitchingChain(false);
+        }
+      }
+
       if (assetType === 'token' && selectedToken) {
         const isNativeETH = selectedToken.contractAddress.toLowerCase() === NATIVE_ETH_ADDRESS.toLowerCase();
 
@@ -511,6 +531,39 @@ export default function CreateGiveaway() {
 
         {step === 'result' && (
           <div className="card">
+            {/* Chain Warning Banner */}
+            {isWrongChain && !confirmedTxHash && (
+              <div className="mb-4 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-xl">
+                <div className="flex items-center gap-3">
+                  <svg className="w-5 h-5 text-yellow-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                  <div>
+                    <p className="text-yellow-500 font-medium text-sm">Wrong Network</p>
+                    <p className="text-yellow-500/70 text-xs">
+                      You are not connected to Base. The network will be switched automatically when you transfer.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Chain Switching Indicator */}
+            {switchingChain && (
+              <div className="mb-4 p-4 bg-base-blue/10 border border-base-blue/30 rounded-xl">
+                <div className="flex items-center gap-3">
+                  <svg className="w-5 h-5 text-base-blue animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  <div>
+                    <p className="text-base-blue font-medium text-sm">Switching Network</p>
+                    <p className="text-base-blue/70 text-xs">Please confirm the network switch in your wallet...</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <ResultDisplay
               winners={winners}
               assetType={assetType}
@@ -519,7 +572,7 @@ export default function CreateGiveaway() {
               amount={amount}
               autoTransfer={autoTransfer}
               onTransfer={handleTransfer}
-              transferring={transferring || isConfirming}
+              transferring={transferring || isConfirming || switchingChain}
               transactionHash={confirmedTxHash}
             />
 

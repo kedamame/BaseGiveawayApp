@@ -2,6 +2,7 @@
 
 import { useSignIn, StatusAPIResponse } from '@farcaster/auth-kit';
 import { useCallback, useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 interface FarcasterUser {
   fid: number;
@@ -63,7 +64,7 @@ export function FarcasterLogin() {
 
   if (isSuccess && user) {
     return (
-      <div className="relative">
+      <div className="relative z-[60]">
         <button
           onClick={() => setShowDropdown(!showDropdown)}
           className="flex items-center gap-2 py-2 px-3 bg-base-gray-800 hover:bg-base-gray-700 rounded-xl transition-colors"
@@ -84,11 +85,15 @@ export function FarcasterLogin() {
 
         {showDropdown && (
           <>
-            <div
-              className="fixed inset-0 z-40"
-              onClick={() => setShowDropdown(false)}
-            />
-            <div className="absolute right-0 mt-2 w-48 bg-base-gray-800 border border-base-gray-700 rounded-xl shadow-lg z-50 overflow-hidden">
+            {createPortal(
+              <div
+                className="fixed inset-0 z-[9998] bg-black/20 cursor-pointer"
+                onClick={() => setShowDropdown(false)}
+                aria-hidden="true"
+              />,
+              document.body
+            )}
+            <div className="absolute right-0 mt-2 w-48 bg-base-gray-800 border border-base-gray-700 rounded-xl shadow-lg z-[9999] overflow-hidden">
               <div className="p-3 border-b border-base-gray-700">
                 <p className="text-sm font-medium">{user.displayName}</p>
                 <p className="text-xs text-base-gray-400">FID: {user.fid}</p>

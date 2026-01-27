@@ -2,10 +2,11 @@
 
 import { useAccount, useConnect, useDisconnect } from 'wagmi';
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 export function WalletConnect() {
   const { address, isConnected } = useAccount();
-  const { connect, connectors, isPending } = useConnect();
+  const { connect, connectors, isPending, error, reset } = useConnect();
   const { disconnect } = useDisconnect();
   const [showDropdown, setShowDropdown] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -13,6 +14,27 @@ export function WalletConnect() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Close dropdown and reset on successful connection
+  useEffect(() => {
+    if (isConnected) {
+      setShowDropdown(false);
+      reset();
+    }
+  }, [isConnected, reset]);
+
+  // Reset on error
+  useEffect(() => {
+    if (error) {
+      console.error('Connection error:', error);
+      reset();
+    }
+  }, [error, reset]);
+
+  const handleDisconnect = () => {
+    disconnect();
+    setShowDropdown(false);
+  };
 
   const formatAddress = (addr: string) => {
     return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
@@ -37,7 +59,7 @@ export function WalletConnect() {
 
   if (isConnected && address) {
     return (
-      <div className="relative">
+      <div className="relative z-[60]">
         <button
           onClick={() => setShowDropdown(!showDropdown)}
           className="btn-secondary flex items-center gap-2 py-2 px-4"
@@ -48,16 +70,17 @@ export function WalletConnect() {
 
         {showDropdown && (
           <>
-            <div
-              className="fixed inset-0 z-40"
-              onClick={() => setShowDropdown(false)}
-            />
-            <div className="absolute right-0 mt-2 w-48 bg-base-gray-800 border border-base-gray-700 rounded-xl shadow-lg z-50 overflow-hidden">
+            {createPortal(
+              <div
+                className="fixed inset-0 z-[9998] bg-black/20 cursor-pointer"
+                onClick={() => setShowDropdown(false)}
+                aria-hidden="true"
+              />,
+              document.body
+            )}
+            <div className="absolute right-0 mt-2 w-48 bg-base-gray-800 border border-base-gray-700 rounded-xl shadow-lg z-[9999] overflow-hidden">
               <button
-                onClick={() => {
-                  disconnect();
-                  setShowDropdown(false);
-                }}
+                onClick={handleDisconnect}
                 className="w-full px-4 py-3 text-left text-sm hover:bg-base-gray-700 transition-colors flex items-center gap-2"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -73,7 +96,7 @@ export function WalletConnect() {
   }
 
   return (
-    <div className="relative">
+    <div className="relative z-[60]">
       <button
         onClick={() => setShowDropdown(!showDropdown)}
         disabled={isPending}
@@ -89,16 +112,20 @@ export function WalletConnect() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
           </svg>
         )}
-        Connect
+        {isPending ? 'Connecting...' : 'Connect'}
       </button>
 
       {showDropdown && (
         <>
-          <div
-            className="fixed inset-0 z-40"
-            onClick={() => setShowDropdown(false)}
-          />
-          <div className="absolute right-0 mt-2 w-64 bg-base-gray-800 border border-base-gray-700 rounded-xl shadow-lg z-50 overflow-hidden">
+          {createPortal(
+            <div
+              className="fixed inset-0 z-[9998] bg-black/20 cursor-pointer"
+              onClick={() => setShowDropdown(false)}
+              aria-hidden="true"
+            />,
+            document.body
+          )}
+          <div className="absolute right-0 mt-2 w-64 bg-base-gray-800 border border-base-gray-700 rounded-xl shadow-lg z-[9999] overflow-hidden">
             <div className="p-3 border-b border-base-gray-700">
               <p className="text-sm text-base-gray-400">Connect Wallet</p>
             </div>
@@ -108,9 +135,9 @@ export function WalletConnect() {
                   key={connector.uid}
                   onClick={() => {
                     connect({ connector });
-                    setShowDropdown(false);
                   }}
-                  className="w-full px-3 py-2 text-left text-sm hover:bg-base-gray-700 rounded-lg transition-colors flex items-center gap-3"
+                  disabled={isPending}
+                  className="w-full px-3 py-2 text-left text-sm hover:bg-base-gray-700 rounded-lg transition-colors flex items-center gap-3 disabled:opacity-50"
                 >
                   <div className="w-8 h-8 bg-base-gray-600 rounded-lg flex items-center justify-center">
                     {connector.name === 'Coinbase Wallet' ? (
