@@ -1,0 +1,104 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --base-blue: #0052FF;
+  --base-blue-dark: #0041CC;
+  --base-blue-light: #3373FF;
+  --base-black: #0A0B0D;
+  --base-white: #FFFFFF;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+body {
+  background: linear-gradient(180deg, #0A0B0D 0%, #1a1b1f 100%);
+  color: #FFFFFF;
+  min-height: 100vh;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 82, 255, 0.5);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 82, 255, 0.7);
+}
+
+/* Base button styles */
+@layer components {
+  .btn-primary {
+    @apply bg-base-blue hover:bg-base-blue-dark text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply bg-base-gray-800 hover:bg-base-gray-700 text-white font-semibold py-3 px-6 rounded-xl border border-base-gray-600 transition-all duration-200;
+  }
+
+  .btn-outline {
+    @apply bg-transparent hover:bg-base-blue/10 text-base-blue font-semibold py-3 px-6 rounded-xl border-2 border-base-blue transition-all duration-200;
+  }
+
+  .card {
+    @apply bg-base-gray-900/50 backdrop-blur-sm border border-base-gray-800 rounded-2xl p-6;
+  }
+
+  .input {
+    @apply w-full bg-base-gray-800 border border-base-gray-600 rounded-xl px-4 py-3 text-white placeholder:text-base-gray-400 focus:outline-none focus:border-base-blue focus:ring-1 focus:ring-base-blue transition-all duration-200;
+  }
+
+  .label {
+    @apply block text-sm font-medium text-base-gray-300 mb-2;
+  }
+}
+
+/* Lottery animation */
+@keyframes lottery-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes confetti {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+.lottery-spinner {
+  animation: lottery-spin 0.1s linear infinite;
+}
+
+.confetti {
+  animation: confetti 3s ease-out forwards;
+}

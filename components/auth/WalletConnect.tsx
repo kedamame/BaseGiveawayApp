@@ -1,0 +1,136 @@
+'use client';
+
+import { useAccount, useConnect, useDisconnect } from 'wagmi';
+import { useState, useEffect } from 'react';
+
+export function WalletConnect() {
+  const { address, isConnected } = useAccount();
+  const { connect, connectors, isPending } = useConnect();
+  const { disconnect } = useDisconnect();
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const formatAddress = (addr: string) => {
+    return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+  };
+
+  // Show placeholder during hydration to prevent mismatch
+  if (!mounted) {
+    return (
+      <div className="relative">
+        <button
+          disabled
+          className="btn-primary py-2 px-4 flex items-center gap-2 opacity-50"
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+          </svg>
+          Connect
+        </button>
+      </div>
+    );
+  }
+
+  if (isConnected && address) {
+    return (
+      <div className="relative">
+        <button
+          onClick={() => setShowDropdown(!showDropdown)}
+          className="btn-secondary flex items-center gap-2 py-2 px-4"
+        >
+          <div className="w-2 h-2 bg-green-500 rounded-full" />
+          {formatAddress(address)}
+        </button>
+
+        {showDropdown && (
+          <>
+            <div
+              className="fixed inset-0 z-40"
+              onClick={() => setShowDropdown(false)}
+            />
+            <div className="absolute right-0 mt-2 w-48 bg-base-gray-800 border border-base-gray-700 rounded-xl shadow-lg z-50 overflow-hidden">
+              <button
+                onClick={() => {
+                  disconnect();
+                  setShowDropdown(false);
+                }}
+                className="w-full px-4 py-3 text-left text-sm hover:bg-base-gray-700 transition-colors flex items-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                Disconnect
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setShowDropdown(!showDropdown)}
+        disabled={isPending}
+        className="btn-primary py-2 px-4 flex items-center gap-2"
+      >
+        {isPending ? (
+          <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+          </svg>
+        ) : (
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+          </svg>
+        )}
+        Connect
+      </button>
+
+      {showDropdown && (
+        <>
+          <div
+            className="fixed inset-0 z-40"
+            onClick={() => setShowDropdown(false)}
+          />
+          <div className="absolute right-0 mt-2 w-64 bg-base-gray-800 border border-base-gray-700 rounded-xl shadow-lg z-50 overflow-hidden">
+            <div className="p-3 border-b border-base-gray-700">
+              <p className="text-sm text-base-gray-400">Connect Wallet</p>
+            </div>
+            <div className="p-2">
+              {connectors.map((connector) => (
+                <button
+                  key={connector.uid}
+                  onClick={() => {
+                    connect({ connector });
+                    setShowDropdown(false);
+                  }}
+                  className="w-full px-3 py-2 text-left text-sm hover:bg-base-gray-700 rounded-lg transition-colors flex items-center gap-3"
+                >
+                  <div className="w-8 h-8 bg-base-gray-600 rounded-lg flex items-center justify-center">
+                    {connector.name === 'Coinbase Wallet' ? (
+                      <svg viewBox="0 0 32 32" className="w-5 h-5">
+                        <circle cx="16" cy="16" r="16" fill="#0052FF"/>
+                        <path d="M16 6C10.48 6 6 10.48 6 16s4.48 10 10 10 10-4.48 10-10S21.52 6 16 6zm0 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z" fill="white"/>
+                      </svg>
+                    ) : (
+                      <svg className="w-4 h-4 text-base-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                      </svg>
+                    )}
+                  </div>
+                  <span>{connector.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
