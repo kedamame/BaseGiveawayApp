@@ -13,6 +13,9 @@ export const metadata: Metadata = {
     description: 'Token & NFT Lottery on Base',
     type: 'website',
   },
+  other: {
+    'base:app_id': '6978dbae88e3bac59cf3db9e',
+  },
 };
 
 export const viewport: Viewport = {
