@@ -5,6 +5,22 @@ import './globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
 
+// Mini App embed configuration
+const miniAppEmbed = {
+  version: '1',
+  imageUrl: 'https://your-domain.com/og-image.png',
+  button: {
+    title: 'Create Giveaway',
+    action: {
+      type: 'launch_miniapp',
+      name: 'Giveaway App',
+      url: 'https://your-domain.com',
+      splashImageUrl: 'https://your-domain.com/splash-200.png',
+      splashBackgroundColor: '#0A0B0D',
+    },
+  },
+};
+
 export const metadata: Metadata = {
   title: 'Giveaway App - Token & NFT Lottery on Base',
   description: 'Create and run fair token and NFT giveaways on Base. Weighted lottery, Farcaster integration, automatic distribution.',
@@ -12,6 +28,10 @@ export const metadata: Metadata = {
     title: 'Giveaway App',
     description: 'Token & NFT Lottery on Base',
     type: 'website',
+    images: ['/og-image.png'],
+  },
+  other: {
+    'fc:miniapp': JSON.stringify(miniAppEmbed),
   },
   other: {
     'base:app_id': '6978dbae88e3bac59cf3db9e',

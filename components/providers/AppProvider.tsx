@@ -5,6 +5,7 @@ import { WagmiProvider } from 'wagmi';
 import { AuthKitProvider } from '@farcaster/auth-kit';
 import { config } from '@/lib/wagmi';
 import { useState, type ReactNode } from 'react';
+import { MiniAppProvider } from './MiniAppProvider';
 
 const authKitConfig = {
   rpcUrl: 'https://mainnet.optimism.io',
@@ -29,12 +30,14 @@ export function AppProvider({ children }: AppProviderProps) {
   );
 
   return (
-    <WagmiProvider config={config}>
-      <QueryClientProvider client={queryClient}>
-        <AuthKitProvider config={authKitConfig}>
-          {children}
-        </AuthKitProvider>
-      </QueryClientProvider>
-    </WagmiProvider>
+    <MiniAppProvider>
+      <WagmiProvider config={config}>
+        <QueryClientProvider client={queryClient}>
+          <AuthKitProvider config={authKitConfig}>
+            {children}
+          </AuthKitProvider>
+        </QueryClientProvider>
+      </WagmiProvider>
+    </MiniAppProvider>
   );
 }
