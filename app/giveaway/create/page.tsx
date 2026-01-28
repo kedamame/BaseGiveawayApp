@@ -24,8 +24,8 @@ export default function CreateGiveaway() {
   const chainId = useChainId();
   const { switchChainAsync } = useSwitchChain();
   const { writeContract, data: txHash } = useWriteContract();
-  const { sendTransaction, data: ethTxHash } = useSendTransaction();
-  const pendingHash = txHash || ethTxHash;
+  const sendTransaction = useSendTransaction();
+  const pendingHash = txHash || sendTransaction.data;
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
     hash: pendingHash,
   });
@@ -133,7 +133,7 @@ export default function CreateGiveaway() {
           const perWinner = totalAmount / BigInt(winners.length);
 
           for (const winner of winners) {
-            sendTransaction({
+            sendTransaction.mutate({
               to: winner.address as `0x${string}`,
               value: perWinner,
             });
