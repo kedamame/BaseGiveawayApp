@@ -144,7 +144,7 @@ export default function CreateGiveaway() {
           const perWinner = totalAmount / BigInt(winners.length);
 
           for (const winner of winners) {
-            writeContract({
+            (writeContract as (args: unknown) => void)({
               address: selectedToken.contractAddress as `0x${string}`,
               abi: [
                 {
@@ -170,7 +170,7 @@ export default function CreateGiveaway() {
           const isERC721 = nft.tokenType === 'ERC721';
 
           if (isERC721) {
-            writeContract({
+            (writeContract as (args: unknown) => void)({
               address: nft.contractAddress as `0x${string}`,
               abi: [
                 {
@@ -192,7 +192,7 @@ export default function CreateGiveaway() {
               ],
             });
           } else {
-            writeContract({
+            (writeContract as (args: unknown) => void)({
               address: nft.contractAddress as `0x${string}`,
               abi: [
                 {
