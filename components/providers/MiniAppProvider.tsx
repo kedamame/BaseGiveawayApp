@@ -25,39 +25,22 @@ export function MiniAppProvider({ children }: MiniAppProviderProps) {
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    const initMiniApp = async () => {
-      let sdk: typeof import('@farcaster/frame-sdk').default | null = null;
-
+    // Check if we're in Farcaster context (ready() is called by FarcasterInit)
+    const checkContext = async () => {
       try {
-        // Dynamic import to avoid SSR issues
-        const module = await import('@farcaster/frame-sdk');
-        sdk = module.default;
-
-        // Get context from Farcaster SDK
-        try {
-          const ctx = await sdk.context;
-          if (ctx) {
-            setIsInMiniApp(true);
-          }
-        } catch (contextError) {
-          console.log('Not in Farcaster context:', contextError);
+        const sdk = await import('@farcaster/frame-sdk');
+        const ctx = await sdk.default.context;
+        if (ctx) {
+          setIsInMiniApp(true);
         }
-      } catch (error) {
-        console.error('Failed to load Farcaster SDK:', error);
+      } catch (e) {
+        // Not in Farcaster environment
       } finally {
-        // Always call ready() to show the app, even if context fetch failed
-        if (sdk) {
-          try {
-            sdk.actions.ready();
-          } catch (readyError) {
-            console.error('Failed to call ready():', readyError);
-          }
-        }
         setIsReady(true);
       }
     };
 
-    initMiniApp();
+    checkContext();
   }, []);
 
   return (

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import { AppProvider } from '@/components/providers/AppProvider';
+import { FarcasterInit } from '@/components/providers/FarcasterInit';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -51,6 +52,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
+        <FarcasterInit />
         <AppProvider>
           <main className="min-h-screen">
             {children}
