@@ -67,20 +67,33 @@ export function MiniAppProvider({ children }: MiniAppProviderProps) {
         if (typeof window !== 'undefined' && window.farcaster) {
           setIsInMiniApp(true);
           setSdk(window.farcaster);
-          setContext(window.farcaster.context);
 
-          // Signal that the app is ready
-          window.farcaster.actions.ready();
+          // Safely access context
+          if (window.farcaster.context) {
+            setContext(window.farcaster.context);
+          }
+
+          // Signal that the app is ready (with delay to ensure SDK is loaded)
+          setTimeout(() => {
+            try {
+              if (window.farcaster?.actions?.ready) {
+                window.farcaster.actions.ready();
+              }
+            } catch (e) {
+              console.error('Failed to call ready:', e);
+            }
+          }, 100);
         }
-
-        setIsReady(true);
       } catch (error) {
         console.error('Failed to initialize Mini App:', error);
+      } finally {
         setIsReady(true);
       }
     };
 
-    initMiniApp();
+    // Small delay to ensure window.farcaster is available
+    const timer = setTimeout(initMiniApp, 50);
+    return () => clearTimeout(timer);
   }, []);
 
   return (

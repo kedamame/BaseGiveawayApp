@@ -1,6 +1,11 @@
 import { createConnector } from 'wagmi';
 import { type EIP1193Provider } from 'viem';
 
+// Check if running inside Farcaster
+function isInFarcaster(): boolean {
+  return typeof window !== 'undefined' && !!window.farcaster;
+}
+
 // Get Farcaster provider from window object
 function getFarcasterProvider(): EIP1193Provider | null {
   if (typeof window !== 'undefined' && window.farcaster?.wallet?.ethProvider) {
@@ -17,10 +22,15 @@ export function farcasterFrame() {
     name: 'Farcaster',
     type: 'farcaster-frame',
 
-    async setup() {},
+    async setup() {
+      // Don't throw during setup - just silently fail if not in Farcaster
+    },
 
     async connect() {
-      const provider = await this.getProvider();
+      const provider = getFarcasterProvider();
+      if (!provider) {
+        throw new Error('Farcaster provider not available');
+      }
       const accounts = (await provider.request({
         method: 'eth_requestAccounts',
       })) as string[];
@@ -37,31 +47,42 @@ export function farcasterFrame() {
     },
 
     async getAccounts() {
-      const provider = await this.getProvider();
-      const accounts = (await provider.request({
-        method: 'eth_accounts',
-      })) as string[];
-      return accounts as `0x${string}`[];
+      const provider = getFarcasterProvider();
+      if (!provider) return [];
+      try {
+        const accounts = (await provider.request({
+          method: 'eth_accounts',
+        })) as string[];
+        return accounts as `0x${string}`[];
+      } catch {
+        return [];
+      }
     },
 
     async getChainId() {
-      const provider = await this.getProvider();
-      const chainId = (await provider.request({
-        method: 'eth_chainId',
-      })) as string;
-      return Number(chainId);
+      const provider = getFarcasterProvider();
+      if (!provider) return config.chains[0].id;
+      try {
+        const chainId = (await provider.request({
+          method: 'eth_chainId',
+        })) as string;
+        return Number(chainId);
+      } catch {
+        return config.chains[0].id;
+      }
     },
 
     async getProvider() {
       const provider = getFarcasterProvider();
       if (!provider) {
-        throw new Error('Farcaster provider not available. Make sure you are running inside Farcaster.');
+        throw new Error('Farcaster provider not available');
       }
       return provider;
     },
 
     async isAuthorized() {
       try {
+        if (!isInFarcaster()) return false;
         const provider = getFarcasterProvider();
         if (!provider) return false;
 
@@ -75,7 +96,10 @@ export function farcasterFrame() {
     },
 
     async switchChain({ chainId }) {
-      const provider = await this.getProvider();
+      const provider = getFarcasterProvider();
+      if (!provider) {
+        throw new Error('Farcaster provider not available');
+      }
       await provider.request({
         method: 'wallet_switchEthereumChain',
         params: [{ chainId: `0x${chainId.toString(16)}` }],

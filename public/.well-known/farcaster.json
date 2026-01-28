@@ -1,4 +1,9 @@
 {
+  "accountAssociation": {
+    "header": "eyJmaWQiOjAsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHgwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwIn0",
+    "payload": "eyJkb21haW4iOiJiYXNlZ2l2ZWF3YXlhcHAudmVyY2VsLmFwcCJ9",
+    "signature": "REPLACE_WITH_YOUR_SIGNATURE"
+  },
   "frame": {
     "version": "1",
     "name": "Giveaway App",
