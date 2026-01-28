@@ -1,9 +1,8 @@
 'use client';
 
 import { useAccount, useConnect, useDisconnect } from 'wagmi';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import sdk from '@farcaster/frame-sdk';
 
 export function WalletConnect() {
   const { address, isConnected } = useAccount();
@@ -11,35 +10,10 @@ export function WalletConnect() {
   const { disconnect } = useDisconnect();
   const [showDropdown, setShowDropdown] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [autoConnectAttempted, setAutoConnectAttempted] = useState(false);
-  const [isInMiniApp, setIsInMiniApp] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    // Check if we're in a Mini App
-    sdk.context.then(ctx => {
-      if (ctx) {
-        setIsInMiniApp(true);
-      }
-    }).catch(() => {
-      // Not in Mini App
-    });
   }, []);
-
-  // Auto-connect Farcaster wallet when in Mini App
-  const autoConnectFarcaster = useCallback(() => {
-    if (isInMiniApp && mounted && !isConnected && !autoConnectAttempted && !isPending) {
-      setAutoConnectAttempted(true);
-      const farcasterConnector = connectors.find(c => c.id === 'farcaster-frame');
-      if (farcasterConnector) {
-        connect({ connector: farcasterConnector });
-      }
-    }
-  }, [isInMiniApp, mounted, isConnected, autoConnectAttempted, isPending, connectors, connect]);
-
-  useEffect(() => {
-    autoConnectFarcaster();
-  }, [autoConnectFarcaster]);
 
   // Close dropdown and reset on successful connection
   useEffect(() => {
@@ -156,16 +130,7 @@ export function WalletConnect() {
               <p className="text-sm text-base-gray-400">Connect Wallet</p>
             </div>
             <div className="p-2">
-              {connectors
-                .filter(connector => {
-                  // In Mini App, only show Farcaster connector
-                  if (isInMiniApp) {
-                    return connector.id === 'farcaster-frame';
-                  }
-                  // Outside Mini App, show all except Farcaster
-                  return connector.id !== 'farcaster-frame';
-                })
-                .map((connector) => (
+              {connectors.map((connector) => (
                 <button
                   key={connector.uid}
                   onClick={() => {
