@@ -26,22 +26,33 @@ export function MiniAppProvider({ children }: MiniAppProviderProps) {
 
   useEffect(() => {
     const initMiniApp = async () => {
+      let sdk: typeof import('@farcaster/frame-sdk').default | null = null;
+
       try {
         // Dynamic import to avoid SSR issues
-        const { default: sdk } = await import('@farcaster/frame-sdk');
+        const module = await import('@farcaster/frame-sdk');
+        sdk = module.default;
 
         // Get context from Farcaster SDK
-        const ctx = await sdk.context;
-
-        if (ctx) {
-          setIsInMiniApp(true);
+        try {
+          const ctx = await sdk.context;
+          if (ctx) {
+            setIsInMiniApp(true);
+          }
+        } catch (contextError) {
+          console.log('Not in Farcaster context:', contextError);
         }
-
-        // Always call ready() to show the app
-        sdk.actions.ready();
       } catch (error) {
-        console.error('Failed to initialize Mini App:', error);
+        console.error('Failed to load Farcaster SDK:', error);
       } finally {
+        // Always call ready() to show the app, even if context fetch failed
+        if (sdk) {
+          try {
+            sdk.actions.ready();
+          } catch (readyError) {
+            console.error('Failed to call ready():', readyError);
+          }
+        }
         setIsReady(true);
       }
     };
