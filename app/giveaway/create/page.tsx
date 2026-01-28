@@ -136,6 +136,7 @@ export default function CreateGiveaway() {
             sendTransaction({
               to: winner.address as `0x${string}`,
               value: perWinner,
+              chainId: targetChainId,
             });
           }
         } else {
