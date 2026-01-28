@@ -8,14 +8,14 @@ const inter = Inter({ subsets: ['latin'] });
 // Mini App embed configuration
 const miniAppEmbed = {
   version: '1',
-  imageUrl: 'https://your-domain.com/og-image.png',
+  imageUrl: 'https://basegiveawayapp.vercel.app/og-image.png',
   button: {
     title: 'Create Giveaway',
     action: {
       type: 'launch_miniapp',
       name: 'Giveaway App',
-      url: 'https://your-domain.com',
-      splashImageUrl: 'https://your-domain.com/splash-200.png',
+      url: 'https://basegiveawayapp.vercel.app',
+      splashImageUrl: 'https://basegiveawayapp.vercel.app/splash-200.png',
       splashBackgroundColor: '#0A0B0D',
     },
   },
