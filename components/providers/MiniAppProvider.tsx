@@ -1,49 +1,20 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
-
-// Types for Farcaster Mini App
-interface FarcasterUser {
-  fid: number;
-  username?: string;
-  displayName?: string;
-  pfpUrl?: string;
-}
-
-interface MiniAppContext {
-  user?: FarcasterUser;
-}
-
-interface FarcasterSDK {
-  context: MiniAppContext;
-  actions: {
-    ready: () => void;
-    openUrl: (url: string) => void;
-    close: () => void;
-  };
-  wallet: {
-    ethProvider: unknown;
-  };
-}
-
-declare global {
-  interface Window {
-    farcaster?: FarcasterSDK;
-  }
-}
+import { createContext, useContext, useEffect, useState, type ReactNode, useCallback } from 'react';
+import sdk, { type Context } from '@farcaster/frame-sdk';
 
 interface MiniAppContextType {
   isInMiniApp: boolean;
   isReady: boolean;
-  context: MiniAppContext | null;
-  sdk: FarcasterSDK | null;
+  context: Context.FrameContext | null;
+  isLoaded: boolean;
 }
 
 const MiniAppContext = createContext<MiniAppContextType>({
   isInMiniApp: false,
   isReady: false,
   context: null,
-  sdk: null,
+  isLoaded: false,
 });
 
 export function useMiniApp() {
@@ -57,47 +28,43 @@ interface MiniAppProviderProps {
 export function MiniAppProvider({ children }: MiniAppProviderProps) {
   const [isInMiniApp, setIsInMiniApp] = useState(false);
   const [isReady, setIsReady] = useState(false);
-  const [context, setContext] = useState<MiniAppContext | null>(null);
-  const [sdk, setSdk] = useState<FarcasterSDK | null>(null);
+  const [context, setContext] = useState<Context.FrameContext | null>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  useEffect(() => {
-    const initMiniApp = async () => {
-      try {
-        // Check if Farcaster SDK is available (running inside Farcaster client)
-        if (typeof window !== 'undefined' && window.farcaster) {
-          setIsInMiniApp(true);
-          setSdk(window.farcaster);
+  const initMiniApp = useCallback(async () => {
+    try {
+      // Get context from Farcaster SDK
+      const ctx = await sdk.context;
 
-          // Safely access context
-          if (window.farcaster.context) {
-            setContext(window.farcaster.context);
-          }
-
-          // Signal that the app is ready (with delay to ensure SDK is loaded)
-          setTimeout(() => {
-            try {
-              if (window.farcaster?.actions?.ready) {
-                window.farcaster.actions.ready();
-              }
-            } catch (e) {
-              console.error('Failed to call ready:', e);
-            }
-          }, 100);
-        }
-      } catch (error) {
-        console.error('Failed to initialize Mini App:', error);
-      } finally {
-        setIsReady(true);
+      if (ctx) {
+        setIsInMiniApp(true);
+        setContext(ctx);
       }
-    };
-
-    // Small delay to ensure window.farcaster is available
-    const timer = setTimeout(initMiniApp, 50);
-    return () => clearTimeout(timer);
+    } catch (error) {
+      console.error('Failed to get Farcaster context:', error);
+    } finally {
+      // Always call ready() to show the app, even if not in Farcaster
+      sdk.actions.ready();
+      setIsReady(true);
+      setIsLoaded(true);
+    }
   }, []);
 
+  useEffect(() => {
+    initMiniApp();
+  }, [initMiniApp]);
+
+  // Don't render children until loaded to prevent flash
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-base-black">
+        <div className="w-8 h-8 border-4 border-base-blue border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
   return (
-    <MiniAppContext.Provider value={{ isInMiniApp, isReady, context, sdk }}>
+    <MiniAppContext.Provider value={{ isInMiniApp, isReady, context, isLoaded }}>
       {children}
     </MiniAppContext.Provider>
   );
