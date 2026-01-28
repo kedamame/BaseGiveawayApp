@@ -21,6 +21,15 @@ const nextConfig = {
       },
     ];
   },
+  webpack: (config) => {
+    // Handle missing modules from MetaMask SDK and WalletConnect
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      'pino-pretty': false,
+    };
+    config.externals.push('pino-pretty', '@react-native-async-storage/async-storage');
+    return config;
+  },
 };
 
 module.exports = nextConfig;
