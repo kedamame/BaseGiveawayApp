@@ -4,13 +4,11 @@
     "payload": "eyJkb21haW4iOiJiYXNlZ2l2ZWF3YXlhcHAudmVyY2VsLmFwcCJ9",
     "signature": "FNKFcjiVmFYuo+66X//5MrTW7sYox5bQKcwBsOwvBHN9SUQCqsgYWXm/32Zk3QiV+qEx8mnYsWQqg7qmN0OnSxw="
   },
-  "frame": {
+  "miniapp": {
     "version": "1",
     "name": "Giveaway App",
-    "subtitle": "Token & NFT Lottery on Base",
-    "description": "Create fair weighted lotteries for your community. Distribute ERC20 tokens or NFTs to lottery winners.",
-    "homeUrl": "https://basegiveawayapp.vercel.app",
     "iconUrl": "https://basegiveawayapp.vercel.app/icon.svg",
+    "homeUrl": "https://basegiveawayapp.vercel.app",
     "splashImageUrl": "https://basegiveawayapp.vercel.app/icon.svg",
     "splashBackgroundColor": "#0A0B0D"
   }
