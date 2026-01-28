@@ -133,8 +133,7 @@ export default function CreateGiveaway() {
           const perWinner = totalAmount / BigInt(winners.length);
 
           for (const winner of winners) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (sendTransaction as any)({
+            (sendTransaction as (args: { to: `0x${string}`; value: bigint }) => void)({
               to: winner.address as `0x${string}`,
               value: perWinner,
             });
