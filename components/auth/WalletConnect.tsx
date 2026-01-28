@@ -1,19 +1,37 @@
 'use client';
 
 import { useAccount, useConnect, useDisconnect } from 'wagmi';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
+import { useMiniApp } from '@/components/providers/MiniAppProvider';
 
 export function WalletConnect() {
   const { address, isConnected } = useAccount();
   const { connect, connectors, isPending, error, reset } = useConnect();
   const { disconnect } = useDisconnect();
+  const { isInMiniApp, isLoaded } = useMiniApp();
   const [showDropdown, setShowDropdown] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [autoConnectAttempted, setAutoConnectAttempted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Auto-connect Farcaster wallet when in Mini App
+  const autoConnectFarcaster = useCallback(() => {
+    if (isInMiniApp && isLoaded && !isConnected && !autoConnectAttempted && !isPending) {
+      setAutoConnectAttempted(true);
+      const farcasterConnector = connectors.find(c => c.id === 'farcaster-frame');
+      if (farcasterConnector) {
+        connect({ connector: farcasterConnector });
+      }
+    }
+  }, [isInMiniApp, isLoaded, isConnected, autoConnectAttempted, isPending, connectors, connect]);
+
+  useEffect(() => {
+    autoConnectFarcaster();
+  }, [autoConnectFarcaster]);
 
   // Close dropdown and reset on successful connection
   useEffect(() => {
@@ -130,7 +148,16 @@ export function WalletConnect() {
               <p className="text-sm text-base-gray-400">Connect Wallet</p>
             </div>
             <div className="p-2">
-              {connectors.map((connector) => (
+              {connectors
+                .filter(connector => {
+                  // In Mini App, only show Farcaster connector
+                  if (isInMiniApp) {
+                    return connector.id === 'farcaster-frame';
+                  }
+                  // Outside Mini App, show all except Farcaster
+                  return connector.id !== 'farcaster-frame';
+                })
+                .map((connector) => (
                 <button
                   key={connector.uid}
                   onClick={() => {
@@ -144,6 +171,11 @@ export function WalletConnect() {
                       <svg viewBox="0 0 32 32" className="w-5 h-5">
                         <circle cx="16" cy="16" r="16" fill="#0052FF"/>
                         <path d="M16 6C10.48 6 6 10.48 6 16s4.48 10 10 10 10-4.48 10-10S21.52 6 16 6zm0 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z" fill="white"/>
+                      </svg>
+                    ) : connector.id === 'farcaster-frame' ? (
+                      <svg viewBox="0 0 32 32" className="w-5 h-5">
+                        <rect width="32" height="32" rx="6" fill="#8A63D2"/>
+                        <path d="M8 10h16v2H8zM8 15h16v2H8zM8 20h10v2H8z" fill="white"/>
                       </svg>
                     ) : (
                       <svg className="w-4 h-4 text-base-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
