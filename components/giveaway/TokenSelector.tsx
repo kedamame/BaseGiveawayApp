@@ -46,17 +46,26 @@ export function TokenSelector({
   }, [address, assetType]);
 
   const fetchAssets = async () => {
-    if (!address) return;
+    if (!address) {
+      console.log('No address available for fetching assets');
+      return;
+    }
+    console.log('Fetching assets for address:', address);
     setLoading(true);
 
     try {
       if (assetType === 'token') {
         const res = await fetch(`/api/tokens?address=${address}`);
         const data = await res.json();
+        console.log('Token API response:', data);
+        if (data.error) {
+          console.error('Token API error:', data.error, data.details);
+        }
         setTokens(data.tokens || []);
       } else {
         const res = await fetch(`/api/nfts?address=${address}`);
         const data = await res.json();
+        console.log('NFT API response:', data);
         setNfts(data.nfts || []);
       }
     } catch (error) {
