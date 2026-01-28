@@ -3,31 +3,39 @@
 import { useAccount, useConnect, useDisconnect } from 'wagmi';
 import { useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { useMiniApp } from '@/components/providers/MiniAppProvider';
+import sdk from '@farcaster/frame-sdk';
 
 export function WalletConnect() {
   const { address, isConnected } = useAccount();
   const { connect, connectors, isPending, error, reset } = useConnect();
   const { disconnect } = useDisconnect();
-  const { isInMiniApp, isLoaded } = useMiniApp();
   const [showDropdown, setShowDropdown] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [autoConnectAttempted, setAutoConnectAttempted] = useState(false);
+  const [isInMiniApp, setIsInMiniApp] = useState(false);
 
   useEffect(() => {
     setMounted(true);
+    // Check if we're in a Mini App
+    sdk.context.then(ctx => {
+      if (ctx) {
+        setIsInMiniApp(true);
+      }
+    }).catch(() => {
+      // Not in Mini App
+    });
   }, []);
 
   // Auto-connect Farcaster wallet when in Mini App
   const autoConnectFarcaster = useCallback(() => {
-    if (isInMiniApp && isLoaded && !isConnected && !autoConnectAttempted && !isPending) {
+    if (isInMiniApp && mounted && !isConnected && !autoConnectAttempted && !isPending) {
       setAutoConnectAttempted(true);
       const farcasterConnector = connectors.find(c => c.id === 'farcaster-frame');
       if (farcasterConnector) {
         connect({ connector: farcasterConnector });
       }
     }
-  }, [isInMiniApp, isLoaded, isConnected, autoConnectAttempted, isPending, connectors, connect]);
+  }, [isInMiniApp, mounted, isConnected, autoConnectAttempted, isPending, connectors, connect]);
 
   useEffect(() => {
     autoConnectFarcaster();

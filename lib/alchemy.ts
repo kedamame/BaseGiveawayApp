@@ -4,11 +4,6 @@ import { Alchemy, Network } from 'alchemy-sdk';
 const API_KEY = process.env.ALCHEMY_API_KEY || process.env.NEXT_PUBLIC_ALCHEMY_API_KEY;
 const BASE_URL = `https://base-mainnet.g.alchemy.com/v2/${API_KEY}`;
 
-// Debug log (only on server)
-if (typeof window === 'undefined') {
-  console.log('Alchemy API Key configured:', !!API_KEY);
-}
-
 const settings = {
   apiKey: API_KEY,
   network: Network.BASE_MAINNET,

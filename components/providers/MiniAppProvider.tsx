@@ -42,12 +42,17 @@ export function MiniAppProvider({ children }: MiniAppProviderProps) {
       }
     } catch (error) {
       console.error('Failed to get Farcaster context:', error);
-    } finally {
-      // Always call ready() to show the app, even if not in Farcaster
-      sdk.actions.ready();
-      setIsReady(true);
-      setIsLoaded(true);
     }
+
+    // Always call ready() to show the app
+    try {
+      sdk.actions.ready();
+    } catch (error) {
+      console.error('Failed to call ready:', error);
+    }
+
+    setIsReady(true);
+    setIsLoaded(true);
   }, []);
 
   useEffect(() => {
