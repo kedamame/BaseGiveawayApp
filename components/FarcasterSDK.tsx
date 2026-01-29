@@ -1,38 +1,41 @@
 'use client';
 
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
+import { sdk } from '@farcaster/miniapp-sdk';
 
 interface FarcasterSDKProps {
   children: ReactNode;
 }
 
 export function FarcasterSDK({ children }: FarcasterSDKProps) {
-  const initialized = useRef(false);
+  const [isSDKLoaded, setIsSDKLoaded] = useState(false);
 
   useEffect(() => {
-    if (initialized.current) return;
-    initialized.current = true;
-
-    const initSDK = async () => {
+    const load = async () => {
       try {
-        const { sdk } = await import('@farcaster/miniapp-sdk');
-
-        // Try to get context to check if we're in Mini App
+        // Get context first (this tells us if we're in a Mini App)
         const context = await sdk.context;
         console.log('Farcaster Mini App context:', context);
-
-        // Call ready() to dismiss splash screen
-        sdk.actions.ready({});
-        console.log('Farcaster SDK ready() called successfully');
       } catch (error) {
-        // Not in Mini App context - this is fine, just log it
         console.log('Not in Farcaster Mini App context:', error);
+      }
+
+      // Always signal that the app is ready - this hides the splash screen
+      // Call this even if context fails, in case we're in a Mini App but context had an issue
+      try {
+        sdk.actions.ready({});
+        console.log('Farcaster SDK ready() called');
+      } catch (error) {
+        console.log('Failed to call ready():', error);
       }
     };
 
-    // Call immediately
-    initSDK();
-  }, []);
+    // Only run once
+    if (sdk && !isSDKLoaded) {
+      setIsSDKLoaded(true);
+      load();
+    }
+  }, [isSDKLoaded]);
 
   return <>{children}</>;
 }
