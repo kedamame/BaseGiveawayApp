@@ -3,24 +3,28 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAccount } from 'wagmi';
-import { useMiniKit } from '@coinbase/onchainkit/minikit';
 import { WalletConnect } from '@/components/auth/WalletConnect';
 
 export default function Home() {
   const { isConnected } = useAccount();
   const [mounted, setMounted] = useState(false);
-  const { setMiniAppReady, isMiniAppReady } = useMiniKit();
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Signal that the app is ready to be displayed
+  // Call Farcaster SDK ready() to display the Mini App
   useEffect(() => {
-    if (!isMiniAppReady) {
-      setMiniAppReady();
-    }
-  }, [setMiniAppReady, isMiniAppReady]);
+    const callReady = async () => {
+      try {
+        const { sdk } = await import('@farcaster/miniapp-sdk');
+        sdk.actions.ready();
+      } catch (e) {
+        // Not in Mini App context
+      }
+    };
+    callReady();
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col">
