@@ -1,9 +1,8 @@
 'use client';
 
 import { useAccount, useConnect, useDisconnect } from 'wagmi';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { useMiniApp } from '@/components/providers/MiniAppProvider';
 
 export function WalletConnect() {
   const { address, isConnected } = useAccount();
@@ -11,33 +10,10 @@ export function WalletConnect() {
   const { disconnect } = useDisconnect();
   const [showDropdown, setShowDropdown] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const { isInMiniApp, isReady } = useMiniApp();
-  const autoConnectAttempted = useRef(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
-
-  // Auto-connect Farcaster wallet in Mini App context
-  useEffect(() => {
-    if (!isReady || !isInMiniApp || isConnected || autoConnectAttempted.current) {
-      return;
-    }
-
-    autoConnectAttempted.current = true;
-
-    // Find the Farcaster connector
-    const farcasterConnector = connectors.find(
-      (c) => c.id === 'farcaster-frame'
-    );
-
-    if (farcasterConnector) {
-      // Small delay to ensure SDK is ready
-      setTimeout(() => {
-        connect({ connector: farcasterConnector });
-      }, 100);
-    }
-  }, [isReady, isInMiniApp, isConnected, connectors, connect]);
 
   // Close dropdown and reset on successful connection
   useEffect(() => {
@@ -54,10 +30,6 @@ export function WalletConnect() {
       reset();
     }
   }, [error, reset]);
-
-  // In Mini App, hide Farcaster connector (auto-connected), show others for fallback
-  // Outside Mini App, show all connectors except Farcaster
-  const visibleConnectors = connectors.filter((c) => c.id !== 'farcaster-frame');
 
   const handleDisconnect = () => {
     disconnect();
@@ -158,7 +130,7 @@ export function WalletConnect() {
               <p className="text-sm text-base-gray-400">Connect Wallet</p>
             </div>
             <div className="p-2">
-              {visibleConnectors.map((connector) => (
+              {connectors.map((connector) => (
                 <button
                   key={connector.uid}
                   onClick={() => {

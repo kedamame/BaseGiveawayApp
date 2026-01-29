@@ -1,11 +1,6 @@
 import { createConnector } from 'wagmi';
 import { type EIP1193Provider } from 'viem';
-
-// Lazy load the SDK to avoid issues during initial load
-async function getSDK() {
-  const { default: sdk } = await import('@farcaster/frame-sdk');
-  return sdk;
-}
+import sdk from '@farcaster/frame-sdk';
 
 export function farcasterFrame() {
   type Provider = EIP1193Provider;
@@ -20,7 +15,6 @@ export function farcasterFrame() {
     },
 
     async connect() {
-      const sdk = await getSDK();
       const provider = sdk.wallet.ethProvider;
       if (!provider) {
         throw new Error('Farcaster provider not available');
@@ -42,7 +36,6 @@ export function farcasterFrame() {
 
     async getAccounts() {
       try {
-        const sdk = await getSDK();
         const provider = sdk.wallet.ethProvider;
         if (!provider) return [];
         const accounts = (await provider.request({
@@ -56,7 +49,6 @@ export function farcasterFrame() {
 
     async getChainId() {
       try {
-        const sdk = await getSDK();
         const provider = sdk.wallet.ethProvider;
         if (!provider) return config.chains[0].id;
         const chainId = (await provider.request({
@@ -69,7 +61,6 @@ export function farcasterFrame() {
     },
 
     async getProvider() {
-      const sdk = await getSDK();
       const provider = sdk.wallet.ethProvider;
       if (!provider) {
         throw new Error('Farcaster provider not available');
@@ -79,7 +70,6 @@ export function farcasterFrame() {
 
     async isAuthorized() {
       try {
-        const sdk = await getSDK();
         const provider = sdk.wallet.ethProvider;
         if (!provider) return false;
 
@@ -93,7 +83,6 @@ export function farcasterFrame() {
     },
 
     async switchChain({ chainId }) {
-      const sdk = await getSDK();
       const provider = sdk.wallet.ethProvider;
       if (!provider) {
         throw new Error('Farcaster provider not available');
