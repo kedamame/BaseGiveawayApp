@@ -8,15 +8,15 @@ const inter = Inter({ subsets: ['latin'] });
 // Mini App embed configuration
 const miniAppEmbed = {
   version: '1',
-  imageUrl: 'https://basegiveawayapp.vercel.app/icon.svg',
+  imageUrl: 'https://basegiveawayapp.vercel.app/icon.png',
   button: {
     title: 'Create Giveaway',
     action: {
       type: 'launch_miniapp',
       name: 'Giveaway App',
       url: 'https://basegiveawayapp.vercel.app',
-      splashImageUrl: 'https://basegiveawayapp.vercel.app/icon.svg',
-      splashBackgroundColor: '#0A0B0D',
+      splashImageUrl: 'https://basegiveawayapp.vercel.app/splash.png',
+      splashBackgroundColor: '#0052FF',
     },
   },
 };
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     title: 'Giveaway App',
     description: 'Token & NFT Lottery on Base',
     type: 'website',
-    images: ['/icon.svg'],
+    images: ['/icon.png'],
   },
   other: {
     'fc:miniapp': JSON.stringify(miniAppEmbed),
