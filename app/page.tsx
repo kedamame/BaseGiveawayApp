@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAccount } from 'wagmi';
+import { sdk } from '@farcaster/miniapp-sdk';
 import { WalletConnect } from '@/components/auth/WalletConnect';
 
 export default function Home() {
@@ -11,19 +12,8 @@ export default function Home() {
 
   useEffect(() => {
     setMounted(true);
-  }, []);
-
-  // Call Farcaster SDK ready() to display the Mini App
-  useEffect(() => {
-    const callReady = async () => {
-      try {
-        const { sdk } = await import('@farcaster/miniapp-sdk');
-        sdk.actions.ready();
-      } catch (e) {
-        // Not in Mini App context
-      }
-    };
-    callReady();
+    // Call ready() immediately on mount
+    sdk.actions.ready();
   }, []);
 
   return (
