@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAccount } from 'wagmi';
-import { sdk } from '@farcaster/miniapp-sdk';
 import { WalletConnect } from '@/components/auth/WalletConnect';
 
 export default function Home() {
@@ -15,20 +14,22 @@ export default function Home() {
     setMounted(true);
   }, []);
 
-  // Initialize Farcaster SDK following official demo pattern
+  // Initialize Farcaster SDK with dynamic import
   useEffect(() => {
     const load = async () => {
       try {
+        const { sdk } = await import('@farcaster/miniapp-sdk');
         // Get context first
         await sdk.context;
         // Then call ready() with empty object
         sdk.actions.ready({});
+        console.log('Farcaster SDK ready() called');
       } catch (e) {
-        console.log('Not in Mini App context');
+        console.log('Not in Mini App context:', e);
       }
     };
 
-    if (sdk && !isSDKLoaded) {
+    if (!isSDKLoaded) {
       setIsSDKLoaded(true);
       load();
     }
