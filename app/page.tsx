@@ -9,12 +9,30 @@ import { WalletConnect } from '@/components/auth/WalletConnect';
 export default function Home() {
   const { isConnected } = useAccount();
   const [mounted, setMounted] = useState(false);
+  const [isSDKLoaded, setIsSDKLoaded] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    // Call ready() immediately on mount
-    sdk.actions.ready();
   }, []);
+
+  // Initialize Farcaster SDK following official demo pattern
+  useEffect(() => {
+    const load = async () => {
+      try {
+        // Get context first
+        await sdk.context;
+        // Then call ready() with empty object
+        sdk.actions.ready({});
+      } catch (e) {
+        console.log('Not in Mini App context');
+      }
+    };
+
+    if (sdk && !isSDKLoaded) {
+      setIsSDKLoaded(true);
+      load();
+    }
+  }, [isSDKLoaded]);
 
   return (
     <div className="min-h-screen flex flex-col">
