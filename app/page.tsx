@@ -3,16 +3,24 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAccount } from 'wagmi';
+import { useMiniKit } from '@coinbase/onchainkit/minikit';
 import { WalletConnect } from '@/components/auth/WalletConnect';
-import { FarcasterLogin } from '@/components/auth/FarcasterLogin';
 
 export default function Home() {
-  const { isConnected, address } = useAccount();
+  const { isConnected } = useAccount();
   const [mounted, setMounted] = useState(false);
+  const { setFrameReady, isFrameReady } = useMiniKit();
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Signal that the app is ready to be displayed
+  useEffect(() => {
+    if (!isFrameReady) {
+      setFrameReady();
+    }
+  }, [setFrameReady, isFrameReady]);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -26,7 +34,6 @@ export default function Home() {
             <span className="font-bold text-lg">Giveaway</span>
           </div>
           <div className="flex items-center gap-3">
-            <FarcasterLogin />
             <WalletConnect />
           </div>
         </div>
