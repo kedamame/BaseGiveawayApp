@@ -1,6 +1,6 @@
 import { createConnector } from 'wagmi';
 import { type EIP1193Provider } from 'viem';
-import sdk from '@farcaster/frame-sdk';
+import { sdk } from '@farcaster/miniapp-sdk';
 
 export function farcasterFrame() {
   type Provider = EIP1193Provider;
