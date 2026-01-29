@@ -25,26 +25,10 @@ export function MiniAppProvider({ children }: MiniAppProviderProps) {
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    const checkContext = async () => {
-      // Check if we're in an iframe (Mini App runs in iframe)
-      const isIframe = typeof window !== 'undefined' && window !== window.parent;
-
-      if (isIframe) {
-        try {
-          const sdk = await import('@farcaster/frame-sdk');
-          const ctx = await sdk.default.context;
-          if (ctx) {
-            setIsInMiniApp(true);
-          }
-        } catch (e) {
-          // Iframe but not Farcaster - could be other embed
-        }
-      }
-
-      setIsReady(true);
-    };
-
-    checkContext();
+    // Check if we're in an iframe (Mini App runs in iframe)
+    const isIframe = typeof window !== 'undefined' && window !== window.parent;
+    setIsInMiniApp(isIframe);
+    setIsReady(true);
   }, []);
 
   return (

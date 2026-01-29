@@ -1,33 +1,21 @@
 'use client';
 
 import { useAccount, useConnect, useDisconnect } from 'wagmi';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { useMiniApp } from '@/components/providers/MiniAppProvider';
 
 export function WalletConnect() {
   const { address, isConnected } = useAccount();
   const { connect, connectors, isPending, error, reset } = useConnect();
   const { disconnect } = useDisconnect();
-  const { isInMiniApp } = useMiniApp();
   const [showDropdown, setShowDropdown] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const autoConnectAttempted = useRef(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Auto-connect Farcaster wallet when in Mini App
-  useEffect(() => {
-    if (isInMiniApp && !isConnected && !autoConnectAttempted.current && mounted) {
-      autoConnectAttempted.current = true;
-      const farcasterConnector = connectors.find(c => c.id === 'farcaster-frame');
-      if (farcasterConnector) {
-        connect({ connector: farcasterConnector });
-      }
-    }
-  }, [isInMiniApp, isConnected, connectors, connect, mounted]);
+  // Auto-connect will be re-enabled after fixing white screen issue
 
   // Close dropdown and reset on successful connection
   useEffect(() => {
@@ -45,10 +33,8 @@ export function WalletConnect() {
     }
   }, [error, reset]);
 
-  // Filter out Farcaster connector when in Mini App (it auto-connects)
-  const visibleConnectors = isInMiniApp
-    ? connectors.filter(c => c.id !== 'farcaster-frame')
-    : connectors;
+  // Show all connectors for now
+  const visibleConnectors = connectors;
 
   const handleDisconnect = () => {
     disconnect();
