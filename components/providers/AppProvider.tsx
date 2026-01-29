@@ -5,7 +5,6 @@ import { WagmiProvider } from 'wagmi';
 import { AuthKitProvider } from '@farcaster/auth-kit';
 import { config } from '@/lib/wagmi';
 import { useState, useEffect, type ReactNode } from 'react';
-import { sdk } from '@farcaster/miniapp-sdk';
 
 const authKitConfig = {
   rpcUrl: 'https://mainnet.optimism.io',
@@ -29,9 +28,17 @@ export function AppProvider({ children }: AppProviderProps) {
       })
   );
 
-  // Call ready() to hide splash screen - must be in useEffect
+  // Call ready() using dynamic import to avoid SSR issues
   useEffect(() => {
-    sdk.actions.ready();
+    const initMiniApp = async () => {
+      try {
+        const { sdk } = await import('@farcaster/miniapp-sdk');
+        sdk.actions.ready();
+      } catch (e) {
+        console.log('MiniApp SDK not available');
+      }
+    };
+    initMiniApp();
   }, []);
 
   return (
