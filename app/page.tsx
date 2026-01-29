@@ -9,7 +9,7 @@ import { WalletConnect } from '@/components/auth/WalletConnect';
 export default function Home() {
   const { isConnected } = useAccount();
   const [mounted, setMounted] = useState(false);
-  const { setFrameReady, isFrameReady } = useMiniKit();
+  const { setMiniAppReady, isMiniAppReady } = useMiniKit();
 
   useEffect(() => {
     setMounted(true);
@@ -17,10 +17,10 @@ export default function Home() {
 
   // Signal that the app is ready to be displayed
   useEffect(() => {
-    if (!isFrameReady) {
-      setFrameReady();
+    if (!isMiniAppReady) {
+      setMiniAppReady();
     }
-  }, [setFrameReady, isFrameReady]);
+  }, [setMiniAppReady, isMiniAppReady]);
 
   return (
     <div className="min-h-screen flex flex-col">
