@@ -13,20 +13,29 @@ export function FarcasterSDK({ children }: FarcasterSDKProps) {
   useEffect(() => {
     const load = async () => {
       try {
-        // Get context first (this tells us if we're in a Mini App)
-        const context = await sdk.context;
-        console.log('Farcaster Mini App context:', context);
-      } catch (error) {
-        console.log('Not in Farcaster Mini App context:', error);
-      }
+        // First check if we're actually in a Mini App environment
+        const isMiniApp = await sdk.isInMiniApp();
+        console.log('Is in Mini App:', isMiniApp);
 
-      // Always signal that the app is ready - this hides the splash screen
-      // Call this even if context fails, in case we're in a Mini App but context had an issue
-      try {
-        sdk.actions.ready({});
-        console.log('Farcaster SDK ready() called');
+        if (isMiniApp) {
+          // Get context
+          const context = await sdk.context;
+          console.log('Farcaster Mini App context:', context);
+
+          // Signal that the app is ready - this hides the splash screen
+          sdk.actions.ready({});
+          console.log('Farcaster SDK ready() called');
+        } else {
+          console.log('Not in Farcaster Mini App - skipping SDK initialization');
+        }
       } catch (error) {
-        console.log('Failed to call ready():', error);
+        console.log('Farcaster SDK error:', error);
+        // Still try to call ready() in case we are in Mini App but had an error
+        try {
+          sdk.actions.ready({});
+        } catch (e) {
+          // Ignore
+        }
       }
     };
 
