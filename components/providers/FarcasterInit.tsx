@@ -1,18 +1,30 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 export function FarcasterInit() {
+  const initialized = useRef(false);
+
   useEffect(() => {
-    // Always try to call ready() - it's safe to call in browser too
-    import('@farcaster/frame-sdk')
-      .then((mod) => {
-        mod.default.actions.ready();
-        console.log('Farcaster SDK ready() called');
-      })
-      .catch((err) => {
-        console.log('Farcaster SDK not available:', err);
-      });
+    // Only initialize once
+    if (initialized.current) return;
+    initialized.current = true;
+
+    // Call ready() immediately to prevent timeout
+    const initSDK = async () => {
+      try {
+        const sdk = await import('@farcaster/frame-sdk');
+        // Call ready() as soon as SDK is loaded
+        await sdk.default.actions.ready();
+        console.log('Farcaster SDK ready() called successfully');
+      } catch (err) {
+        // Not in Farcaster context - this is fine
+        console.log('Farcaster SDK not available (not in Mini App context)');
+      }
+    };
+
+    // Start initialization immediately
+    initSDK();
   }, []);
 
   return null;
