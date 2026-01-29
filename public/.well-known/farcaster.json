@@ -4,12 +4,11 @@
     "payload": "eyJkb21haW4iOiJiYXNlZ2l2ZWF3YXlhcHAudmVyY2VsLmFwcCJ9",
     "signature": "FNKFcjiVmFYuo+66X//5MrTW7sYox5bQKcwBsOwvBHN9SUQCqsgYWXm/32Zk3QiV+qEx8mnYsWQqg7qmN0OnSxw="
   },
-  "frame": {
-    "name": "BaseGiveawayApp",
+  "miniapp": {
     "version": "1",
+    "name": "BaseGiveawayApp",
     "iconUrl": "https://basegiveawayapp.vercel.app/icon.png",
     "homeUrl": "https://basegiveawayapp.vercel.app",
-    "imageUrl": "https://basegiveawayapp.vercel.app/image.png",
     "splashImageUrl": "https://basegiveawayapp.vercel.app/splash.png",
     "splashBackgroundColor": "#0052FF",
     "webhookUrl": "https://basegiveawayapp.vercel.app/api/webhook",
