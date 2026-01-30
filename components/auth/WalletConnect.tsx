@@ -13,12 +13,16 @@ export function WalletConnect() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  // Filter connectors: hide 'injected' on web to avoid browser extension conflicts
+  // Filter connectors based on environment
   const filteredConnectors = connectors.filter(c => {
-    if (c.id === 'injected' && !isInMiniApp) {
-      return false; // Hide injected on web
+    if (isInMiniApp) {
+      // In Mini App: only show injected (Farcaster wallet)
+      return c.id === 'injected';
+    } else {
+      // On web: only show our configured connectors (Coinbase Wallet and WalletConnect)
+      // Hide all auto-detected browser extension wallets to avoid conflicts
+      return c.id === 'coinbaseWalletSDK' || c.id === 'walletConnect';
     }
-    return true;
   });
 
   // Debug logging
@@ -163,10 +167,15 @@ export function WalletConnect() {
                   className="w-full px-3 py-2 text-left text-sm hover:bg-base-gray-700 rounded-lg transition-colors flex items-center gap-3 disabled:opacity-50"
                 >
                   <div className="w-8 h-8 bg-base-gray-600 rounded-lg flex items-center justify-center">
-                    {connector.name === 'Coinbase Wallet' ? (
+                    {connector.id === 'coinbaseWalletSDK' ? (
                       <svg viewBox="0 0 32 32" className="w-5 h-5">
                         <circle cx="16" cy="16" r="16" fill="#0052FF"/>
                         <path d="M16 6C10.48 6 6 10.48 6 16s4.48 10 10 10 10-4.48 10-10S21.52 6 16 6zm0 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z" fill="white"/>
+                      </svg>
+                    ) : connector.id === 'walletConnect' ? (
+                      <svg viewBox="0 0 32 32" className="w-5 h-5">
+                        <rect width="32" height="32" rx="6" fill="#3B99FC"/>
+                        <path d="M10.5 12.5c3-3 8-3 11 0l.4.4c.1.1.1.3 0 .5l-1.3 1.3c-.1.1-.2.1-.3 0l-.5-.5c-2.1-2.1-5.5-2.1-7.6 0l-.5.5c-.1.1-.2.1-.3 0l-1.3-1.3c-.1-.2-.1-.4 0-.5l.4-.4zm13.6 2.5l1.2 1.2c.1.2.1.4 0 .5l-5.4 5.4c-.2.2-.4.2-.5 0l-3.8-3.8c0-.1-.1-.1-.2 0l-3.8 3.8c-.2.2-.4.2-.5 0l-5.4-5.4c-.1-.1-.1-.3 0-.5l1.2-1.2c.2-.1.4-.1.5 0l3.8 3.8c0 .1.1.1.2 0l3.8-3.8c.2-.2.4-.2.5 0l3.8 3.8c.1.1.2.1.2 0l3.8-3.8c.2-.1.4-.1.6 0z" fill="white"/>
                       </svg>
                     ) : (
                       <svg className="w-4 h-4 text-base-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
