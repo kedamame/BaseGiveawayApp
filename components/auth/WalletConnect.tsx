@@ -77,8 +77,10 @@ export function WalletConnect() {
   }, [error, reset]);
 
   const handleDisconnect = () => {
+    console.log('[WalletConnect] Disconnecting...');
     disconnect();
     setShowDropdown(false);
+    console.log('[WalletConnect] Disconnect called');
   };
 
   const formatAddress = (addr: string) => {
@@ -113,19 +115,18 @@ export function WalletConnect() {
           {formatAddress(address)}
         </button>
 
-        {showDropdown && (
+        {showDropdown && createPortal(
           <>
-            {createPortal(
-              <div
-                className="fixed inset-0 z-[9998] bg-black/20 cursor-pointer"
-                onClick={() => setShowDropdown(false)}
-                aria-hidden="true"
-              />,
-              document.body
-            )}
-            <div className="absolute right-0 mt-2 w-48 bg-base-gray-800 border border-base-gray-700 rounded-xl shadow-lg z-[9999] overflow-hidden">
+            <div
+              className="fixed inset-0 z-[9998] bg-black/20"
+              onClick={() => setShowDropdown(false)}
+            />
+            <div className="fixed top-16 right-4 w-48 bg-base-gray-800 border border-base-gray-700 rounded-xl shadow-lg z-[9999] overflow-hidden">
               <button
-                onClick={handleDisconnect}
+                onClick={() => {
+                  console.log('[WalletConnect] Disconnect clicked');
+                  handleDisconnect();
+                }}
                 className="w-full px-4 py-3 text-left text-sm hover:bg-base-gray-700 transition-colors flex items-center gap-2"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -134,7 +135,8 @@ export function WalletConnect() {
                 Disconnect
               </button>
             </div>
-          </>
+          </>,
+          document.body
         )}
       </div>
     );
