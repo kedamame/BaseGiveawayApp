@@ -22,6 +22,13 @@ export function WalletConnect() {
   const connectFarcasterWallet = useCallback(async () => {
     console.log('[WalletConnect] Connecting Farcaster wallet...');
     try {
+      // Disconnect first if already connected
+      if (isConnected) {
+        console.log('[WalletConnect] Already connected, disconnecting first...');
+        disconnect();
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+
       const provider = await sdk.wallet.getEthereumProvider();
       if (typeof window !== 'undefined' && provider) {
         // @ts-ignore
@@ -36,7 +43,7 @@ export function WalletConnect() {
     } catch (err) {
       console.error('[WalletConnect] Farcaster wallet error:', err);
     }
-  }, [connectors, connect]);
+  }, [connectors, connect, isConnected, disconnect]);
 
   // Debug logging
   useEffect(() => {
@@ -183,10 +190,19 @@ export function WalletConnect() {
               {filteredConnectors.map((connector) => (
                 <button
                   key={connector.uid}
-                  onClick={() => {
+                  onClick={async () => {
                     console.log('[WalletConnect] Button clicked!');
                     console.log('[WalletConnect] Attempting to connect with:', connector.id, connector.name);
                     setShowDropdown(false);
+
+                    // Check if already connected
+                    if (isConnected) {
+                      console.log('[WalletConnect] Already connected, disconnecting first...');
+                      disconnect();
+                      // Wait a bit for disconnect to complete
+                      await new Promise(resolve => setTimeout(resolve, 100));
+                    }
+
                     connect({ connector });
                   }}
                   disabled={isPending}
