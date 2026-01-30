@@ -1,7 +1,20 @@
 'use client';
 
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode, createContext, useContext } from 'react';
 import { sdk } from '@farcaster/miniapp-sdk';
+
+// Context to share Mini App state
+interface FarcasterContextType {
+  isInMiniApp: boolean;
+  isLoading: boolean;
+}
+
+const FarcasterContext = createContext<FarcasterContextType>({
+  isInMiniApp: false,
+  isLoading: true,
+});
+
+export const useFarcaster = () => useContext(FarcasterContext);
 
 interface FarcasterSDKProps {
   children: ReactNode;
@@ -9,6 +22,8 @@ interface FarcasterSDKProps {
 
 export function FarcasterSDK({ children }: FarcasterSDKProps) {
   const [isSDKLoaded, setIsSDKLoaded] = useState(false);
+  const [isInMiniApp, setIsInMiniApp] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const load = async () => {
@@ -16,6 +31,7 @@ export function FarcasterSDK({ children }: FarcasterSDKProps) {
         // First check if we're actually in a Mini App environment
         const isMiniApp = await sdk.isInMiniApp();
         console.log('Is in Mini App:', isMiniApp);
+        setIsInMiniApp(isMiniApp);
 
         if (isMiniApp) {
           // Get context
@@ -36,6 +52,8 @@ export function FarcasterSDK({ children }: FarcasterSDKProps) {
         } catch (e) {
           // Ignore
         }
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -46,5 +64,9 @@ export function FarcasterSDK({ children }: FarcasterSDKProps) {
     }
   }, [isSDKLoaded]);
 
-  return <>{children}</>;
+  return (
+    <FarcasterContext.Provider value={{ isInMiniApp, isLoading }}>
+      {children}
+    </FarcasterContext.Provider>
+  );
 }
