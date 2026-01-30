@@ -7,33 +7,67 @@ import { useFarcaster } from './FarcasterSDK';
 
 export function FarcasterWalletConnect() {
   const { isInMiniApp, isLoading } = useFarcaster();
-  const { connect, connectors } = useConnect();
-  const { isConnected } = useAccount();
+  const { connect, connectors, error } = useConnect();
+  const { isConnected, address } = useAccount();
   const hasAttemptedConnect = useRef(false);
+
+  // Log connection state changes
+  useEffect(() => {
+    console.log('[FarcasterWallet] State:', { isInMiniApp, isLoading, isConnected, address });
+    console.log('[FarcasterWallet] Connectors:', connectors.map(c => ({ id: c.id, name: c.name })));
+    if (error) {
+      console.log('[FarcasterWallet] Connection error:', error);
+    }
+  }, [isInMiniApp, isLoading, isConnected, address, connectors, error]);
 
   useEffect(() => {
     const connectWallet = async () => {
+      console.log('[FarcasterWallet] Attempting connection...', {
+        hasAttempted: hasAttemptedConnect.current,
+        isLoading,
+        isInMiniApp,
+        isConnected
+      });
+
       // Only try once, only in Mini App, only if not already connected
       if (hasAttemptedConnect.current || isLoading || !isInMiniApp || isConnected) {
+        console.log('[FarcasterWallet] Skipping connection');
         return;
       }
       hasAttemptedConnect.current = true;
 
       try {
-        // Get the Farcaster wallet provider
+        // Get the Farcaster wallet provider and inject it
+        console.log('[FarcasterWallet] Getting Farcaster provider...');
         const provider = await sdk.wallet.getEthereumProvider();
-        console.log('Farcaster wallet provider obtained:', provider);
+        console.log('[FarcasterWallet] Provider obtained:', provider);
+
+        // Inject the provider as window.ethereum if not already set
+        if (typeof window !== 'undefined') {
+          // @ts-ignore
+          if (!window.ethereum) {
+            // @ts-ignore
+            window.ethereum = provider;
+            console.log('[FarcasterWallet] Injected provider as window.ethereum');
+          }
+        }
 
         // Find the injected connector and connect
         const injectedConnector = connectors.find(c => c.id === 'injected');
         if (injectedConnector) {
-          console.log('Connecting with injected connector...');
+          console.log('[FarcasterWallet] Connecting with injected connector...');
           connect({ connector: injectedConnector });
         } else {
-          console.log('No injected connector found, available:', connectors.map(c => c.id));
+          console.log('[FarcasterWallet] No injected connector found');
+          // Try coinbase wallet as fallback
+          const cbConnector = connectors.find(c => c.id === 'coinbaseWalletSDK');
+          if (cbConnector) {
+            console.log('[FarcasterWallet] Trying Coinbase Wallet connector...');
+            connect({ connector: cbConnector });
+          }
         }
-      } catch (error) {
-        console.log('Farcaster wallet connection error:', error);
+      } catch (err) {
+        console.log('[FarcasterWallet] Error:', err);
       }
     };
 
