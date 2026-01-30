@@ -7,11 +7,11 @@
   "miniapp": {
     "version": "1",
     "name": "BaseGiveawayApp",
-    "iconUrl": "https://basegiveawayapp.vercel.app/icon.png",
-    "homeUrl": "https://basegiveawayapp.vercel.app",
-    "splashImageUrl": "https://basegiveawayapp.vercel.app/splash.png",
+    "iconUrl": "https://base-giveaway-app.vercel.app/icon.png",
+    "homeUrl": "https://base-giveaway-app.vercel.app",
+    "splashImageUrl": "https://base-giveaway-app.vercel.app/splash.png",
     "splashBackgroundColor": "#0052FF",
-    "webhookUrl": "https://basegiveawayapp.vercel.app/api/webhook",
+    "webhookUrl": "https://base-giveaway-app.vercel.app/api/webhook",
     "subtitle": "Giveaway on Base chain",
     "description": "You can give away tokens or NFTs to random winners on the Base chain!",
     "primaryCategory": "entertainment"
