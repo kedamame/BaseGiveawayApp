@@ -1,11 +1,16 @@
 import { http, createConfig } from 'wagmi';
 import { base, baseSepolia } from 'wagmi/chains';
-import { coinbaseWallet, walletConnect } from 'wagmi/connectors';
+import { coinbaseWallet, injected, walletConnect } from 'wagmi/connectors';
 
 const projectId = process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || '';
 
-// Build connectors array - removed injected() to avoid conflicts with wallet extensions
+// Build connectors array
 const connectors = [
+  // Injected connector for Mini App (Farcaster wallet)
+  injected({
+    shimDisconnect: true,
+  }),
+  // Coinbase Wallet for web
   coinbaseWallet({
     appName: 'Giveaway App',
     preference: 'all',

@@ -3,13 +3,23 @@
 import { useAccount, useConnect, useDisconnect } from 'wagmi';
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { useFarcaster } from '@/components/FarcasterSDK';
 
 export function WalletConnect() {
   const { address, isConnected } = useAccount();
   const { connect, connectors, isPending, error, reset } = useConnect();
   const { disconnect } = useDisconnect();
+  const { isInMiniApp } = useFarcaster();
   const [showDropdown, setShowDropdown] = useState(false);
   const [mounted, setMounted] = useState(false);
+
+  // Filter connectors: hide 'injected' on web to avoid browser extension conflicts
+  const filteredConnectors = connectors.filter(c => {
+    if (c.id === 'injected' && !isInMiniApp) {
+      return false; // Hide injected on web
+    }
+    return true;
+  });
 
   useEffect(() => {
     setMounted(true);
@@ -134,7 +144,7 @@ export function WalletConnect() {
               <p className="text-sm text-base-gray-400">Connect Wallet</p>
             </div>
             <div className="p-2">
-              {connectors.map((connector) => (
+              {filteredConnectors.map((connector) => (
                 <button
                   key={connector.uid}
                   onClick={() => {
