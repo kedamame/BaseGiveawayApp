@@ -1,9 +1,10 @@
 'use client';
 
 import { useAccount, useConnect, useDisconnect } from 'wagmi';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useFarcaster } from '@/components/FarcasterSDK';
+import { sdk } from '@farcaster/miniapp-sdk';
 
 export function WalletConnect() {
   const { address, isConnected } = useAccount();
@@ -13,17 +14,29 @@ export function WalletConnect() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  // Filter connectors based on environment
-  const filteredConnectors = connectors.filter(c => {
-    if (isInMiniApp) {
-      // In Mini App: only show injected (Farcaster wallet)
-      return c.id === 'injected';
-    } else {
-      // On web: hide only the generic 'injected' connector to avoid conflicts
-      // Show all other wallets (browser extensions + our configured connectors)
-      return c.id !== 'injected';
+  // Filter connectors - hide generic 'injected' to avoid conflicts with browser extensions
+  // We'll add Farcaster wallet as a special option in Mini App
+  const filteredConnectors = connectors.filter(c => c.id !== 'injected');
+
+  // Connect with Farcaster wallet (for Mini App)
+  const connectFarcasterWallet = useCallback(async () => {
+    console.log('[WalletConnect] Connecting Farcaster wallet...');
+    try {
+      const provider = await sdk.wallet.getEthereumProvider();
+      if (typeof window !== 'undefined' && provider) {
+        // @ts-ignore
+        window.ethereum = provider;
+        console.log('[WalletConnect] Farcaster provider injected');
+      }
+      const injectedConnector = connectors.find(c => c.id === 'injected');
+      if (injectedConnector) {
+        setShowDropdown(false);
+        connect({ connector: injectedConnector });
+      }
+    } catch (err) {
+      console.error('[WalletConnect] Farcaster wallet error:', err);
     }
-  });
+  }, [connectors, connect]);
 
   // Debug logging
   useEffect(() => {
@@ -151,6 +164,22 @@ export function WalletConnect() {
               <p className="text-sm text-base-gray-400">Connect Wallet</p>
             </div>
             <div className="p-2 max-h-80 overflow-y-auto">
+              {/* Farcaster Wallet - shown in Mini App */}
+              {isInMiniApp && (
+                <button
+                  onClick={connectFarcasterWallet}
+                  disabled={isPending}
+                  className="w-full px-3 py-2 text-left text-sm hover:bg-base-gray-700 rounded-lg transition-colors flex items-center gap-3 disabled:opacity-50"
+                >
+                  <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
+                    <svg viewBox="0 0 32 32" className="w-5 h-5">
+                      <rect width="32" height="32" rx="6" fill="#8B5CF6"/>
+                      <path d="M8 10h16v2H8v-2zm0 5h16v2H8v-2zm0 5h10v2H8v-2z" fill="white"/>
+                    </svg>
+                  </div>
+                  <span>Farcaster Wallet</span>
+                </button>
+              )}
               {filteredConnectors.map((connector) => (
                 <button
                   key={connector.uid}
