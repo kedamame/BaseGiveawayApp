@@ -21,6 +21,13 @@ export function WalletConnect() {
     return true;
   });
 
+  // Debug logging
+  useEffect(() => {
+    console.log('[WalletConnect] isInMiniApp:', isInMiniApp);
+    console.log('[WalletConnect] All connectors:', connectors.map(c => ({ id: c.id, name: c.name })));
+    console.log('[WalletConnect] Filtered connectors:', filteredConnectors.map(c => ({ id: c.id, name: c.name })));
+  }, [isInMiniApp, connectors, filteredConnectors]);
+
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -148,6 +155,8 @@ export function WalletConnect() {
                 <button
                   key={connector.uid}
                   onClick={() => {
+                    console.log('[WalletConnect] Attempting to connect with:', connector.id, connector.name);
+                    setShowDropdown(false); // Close dropdown before connecting to avoid popup blocking
                     connect({ connector });
                   }}
                   disabled={isPending}
