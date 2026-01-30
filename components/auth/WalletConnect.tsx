@@ -19,9 +19,9 @@ export function WalletConnect() {
       // In Mini App: only show injected (Farcaster wallet)
       return c.id === 'injected';
     } else {
-      // On web: only show our configured connectors (Coinbase Wallet and WalletConnect)
-      // Hide all auto-detected browser extension wallets to avoid conflicts
-      return c.id === 'coinbaseWalletSDK' || c.id === 'walletConnect';
+      // On web: hide only the generic 'injected' connector to avoid conflicts
+      // Show all other wallets (browser extensions + our configured connectors)
+      return c.id !== 'injected';
     }
   });
 
@@ -158,10 +158,25 @@ export function WalletConnect() {
               {filteredConnectors.map((connector) => (
                 <button
                   key={connector.uid}
-                  onClick={() => {
+                  onClick={async () => {
                     console.log('[WalletConnect] Attempting to connect with:', connector.id, connector.name);
                     setShowDropdown(false); // Close dropdown before connecting to avoid popup blocking
-                    connect({ connector });
+                    try {
+                      connect(
+                        { connector },
+                        {
+                          onSuccess: (data) => {
+                            console.log('[WalletConnect] Connection successful:', data);
+                          },
+                          onError: (err) => {
+                            console.error('[WalletConnect] Connection failed:', err);
+                            alert(`Connection failed: ${err.message}`);
+                          },
+                        }
+                      );
+                    } catch (err) {
+                      console.error('[WalletConnect] Connection exception:', err);
+                    }
                   }}
                   disabled={isPending}
                   className="w-full px-3 py-2 text-left text-sm hover:bg-base-gray-700 rounded-lg transition-colors flex items-center gap-3 disabled:opacity-50"
