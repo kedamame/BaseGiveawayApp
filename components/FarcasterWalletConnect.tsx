@@ -42,29 +42,20 @@ export function FarcasterWalletConnect() {
         const provider = await sdk.wallet.getEthereumProvider();
         console.log('[FarcasterWallet] Provider obtained:', provider);
 
-        // Inject the provider as window.ethereum if not already set
-        if (typeof window !== 'undefined') {
+        // Inject the provider as window.ethereum
+        if (typeof window !== 'undefined' && provider) {
           // @ts-ignore
-          if (!window.ethereum) {
-            // @ts-ignore
-            window.ethereum = provider;
-            console.log('[FarcasterWallet] Injected provider as window.ethereum');
-          }
+          window.ethereum = provider;
+          console.log('[FarcasterWallet] Injected provider as window.ethereum');
         }
 
-        // Find the injected connector and connect
-        const injectedConnector = connectors.find(c => c.id === 'injected');
-        if (injectedConnector) {
-          console.log('[FarcasterWallet] Connecting with injected connector...');
-          connect({ connector: injectedConnector });
+        // Use Coinbase Wallet connector (works with Farcaster's injected provider)
+        const cbConnector = connectors.find(c => c.id === 'coinbaseWalletSDK');
+        if (cbConnector) {
+          console.log('[FarcasterWallet] Connecting with Coinbase Wallet connector...');
+          connect({ connector: cbConnector });
         } else {
-          console.log('[FarcasterWallet] No injected connector found');
-          // Try coinbase wallet as fallback
-          const cbConnector = connectors.find(c => c.id === 'coinbaseWalletSDK');
-          if (cbConnector) {
-            console.log('[FarcasterWallet] Trying Coinbase Wallet connector...');
-            connect({ connector: cbConnector });
-          }
+          console.log('[FarcasterWallet] No Coinbase Wallet connector found, available:', connectors.map(c => c.id));
         }
       } catch (err) {
         console.log('[FarcasterWallet] Error:', err);
