@@ -140,21 +140,17 @@ export function WalletConnect() {
         {isPending ? 'Connecting...' : 'Connect'}
       </button>
 
-      {showDropdown && (
+      {showDropdown && createPortal(
         <>
-          {createPortal(
-            <div
-              className="fixed inset-0 z-[9998] bg-black/20 cursor-pointer"
-              onClick={() => setShowDropdown(false)}
-              aria-hidden="true"
-            />,
-            document.body
-          )}
-          <div className="absolute right-0 mt-2 w-64 bg-base-gray-800 border border-base-gray-700 rounded-xl shadow-lg z-[9999] overflow-hidden">
+          <div
+            className="fixed inset-0 z-[9998] bg-black/20"
+            onClick={() => setShowDropdown(false)}
+          />
+          <div className="fixed top-16 right-4 w-64 bg-base-gray-800 border border-base-gray-700 rounded-xl shadow-lg z-[9999] overflow-hidden">
             <div className="p-3 border-b border-base-gray-700">
               <p className="text-sm text-base-gray-400">Connect Wallet</p>
             </div>
-            <div className="p-2">
+            <div className="p-2 max-h-80 overflow-y-auto">
               {filteredConnectors.map((connector) => (
                 <button
                   key={connector.uid}
@@ -189,7 +185,8 @@ export function WalletConnect() {
               ))}
             </div>
           </div>
-        </>
+        </>,
+        document.body
       )}
     </div>
   );
