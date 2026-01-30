@@ -158,25 +158,11 @@ export function WalletConnect() {
               {filteredConnectors.map((connector) => (
                 <button
                   key={connector.uid}
-                  onClick={async () => {
+                  onClick={() => {
+                    console.log('[WalletConnect] Button clicked!');
                     console.log('[WalletConnect] Attempting to connect with:', connector.id, connector.name);
-                    setShowDropdown(false); // Close dropdown before connecting to avoid popup blocking
-                    try {
-                      connect(
-                        { connector },
-                        {
-                          onSuccess: (data) => {
-                            console.log('[WalletConnect] Connection successful:', data);
-                          },
-                          onError: (err) => {
-                            console.error('[WalletConnect] Connection failed:', err);
-                            alert(`Connection failed: ${err.message}`);
-                          },
-                        }
-                      );
-                    } catch (err) {
-                      console.error('[WalletConnect] Connection exception:', err);
-                    }
+                    setShowDropdown(false);
+                    connect({ connector });
                   }}
                   disabled={isPending}
                   className="w-full px-3 py-2 text-left text-sm hover:bg-base-gray-700 rounded-lg transition-colors flex items-center gap-3 disabled:opacity-50"
