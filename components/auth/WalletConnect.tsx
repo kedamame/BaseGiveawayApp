@@ -7,12 +7,15 @@ import { useFarcaster } from '@/components/FarcasterSDK';
 import { sdk } from '@farcaster/miniapp-sdk';
 
 export function WalletConnect() {
-  const { address, isConnected } = useAccount();
+  const { address, isConnected, isReconnecting } = useAccount();
   const { connect, connectors, isPending, error, reset } = useConnect();
   const { disconnect } = useDisconnect();
   const { isInMiniApp } = useFarcaster();
   const [showDropdown, setShowDropdown] = useState(false);
   const [mounted, setMounted] = useState(false);
+
+  // Show loading during reconnection
+  const isLoading = isReconnecting || isPending;
 
   // Filter connectors - hide generic 'injected' to avoid conflicts with browser extensions
   // We'll add Farcaster wallet as a special option in Mini App
@@ -47,10 +50,9 @@ export function WalletConnect() {
 
   // Debug logging
   useEffect(() => {
+    console.log('[WalletConnect] State:', { isConnected, isReconnecting, address });
     console.log('[WalletConnect] isInMiniApp:', isInMiniApp);
-    console.log('[WalletConnect] All connectors:', connectors.map(c => ({ id: c.id, name: c.name })));
-    console.log('[WalletConnect] Filtered connectors:', filteredConnectors.map(c => ({ id: c.id, name: c.name })));
-  }, [isInMiniApp, connectors, filteredConnectors]);
+  }, [isInMiniApp, isConnected, isReconnecting, address]);
 
   useEffect(() => {
     setMounted(true);
@@ -87,18 +89,19 @@ export function WalletConnect() {
     return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
   };
 
-  // Show placeholder during hydration to prevent mismatch
-  if (!mounted) {
+  // Show placeholder during hydration or reconnection
+  if (!mounted || isReconnecting) {
     return (
       <div className="relative">
         <button
           disabled
           className="btn-primary py-2 px-4 flex items-center gap-2 opacity-50"
         >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+          <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
           </svg>
-          Connect
+          {isReconnecting ? 'Reconnecting...' : 'Connect'}
         </button>
       </div>
     );
