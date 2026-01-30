@@ -23,11 +23,15 @@ export function WalletConnect() {
     }
   }, [isConnected, reset]);
 
-  // Reset on error
+  // Log error but don't reset immediately - let user see the error
   useEffect(() => {
     if (error) {
       console.error('Connection error:', error);
-      reset();
+      // Delay reset to allow the connection process to complete
+      const timer = setTimeout(() => {
+        reset();
+      }, 3000);
+      return () => clearTimeout(timer);
     }
   }, [error, reset]);
 
