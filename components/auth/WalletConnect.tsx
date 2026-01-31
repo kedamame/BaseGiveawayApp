@@ -145,23 +145,15 @@ export function WalletConnect() {
     );
   }
 
-  // Show quick reconnect button if reconnect failed
+  // Show reconnect button if reconnect failed - clicking opens wallet selection
   if (reconnectFailed && !isConnected) {
-    // Try to get the last used connector from wagmi store
-    const tryQuickReconnect = async () => {
-      console.log('[WalletConnect] Trying quick reconnect...');
-      setReconnectFailed(false);
-      // Try to reconnect with the first available connector
-      const connector = connectors.find(c => c.id !== 'injected') || connectors[0];
-      if (connector) {
-        connect({ connector });
-      }
-    };
-
     return (
-      <div className="relative">
+      <div className="relative z-[60]">
         <button
-          onClick={tryQuickReconnect}
+          onClick={() => {
+            setReconnectFailed(false);
+            setShowDropdown(true);
+          }}
           className="btn-primary py-2 px-4 flex items-center gap-2"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
