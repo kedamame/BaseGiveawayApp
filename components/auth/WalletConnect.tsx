@@ -7,20 +7,24 @@ import { useFarcaster } from '@/components/FarcasterSDK';
 import { sdk } from '@farcaster/miniapp-sdk';
 
 export function WalletConnect() {
-  const { address, isConnected, isReconnecting } = useAccount();
+  const { address, isConnected, isReconnecting, status } = useAccount();
   const { connect, connectors, isPending, error, reset } = useConnect();
   const { disconnect } = useDisconnect();
   const { isInMiniApp } = useFarcaster();
   const [showDropdown, setShowDropdown] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [waitingForReconnect, setWaitingForReconnect] = useState(true);
+  const [reconnectFailed, setReconnectFailed] = useState(false);
 
   // Check if we had a previous connection and wait for reconnect
   useEffect(() => {
     if (!mounted) return;
 
     // Check if wagmi has stored connection data
-    const hasStoredConnection = localStorage.getItem('wagmi.store') !== null;
+    const wagmiStore = localStorage.getItem('wagmi.store');
+    const hasStoredConnection = wagmiStore !== null;
+
+    console.log('[WalletConnect] Checking stored connection:', { hasStoredConnection, status });
 
     if (!hasStoredConnection) {
       // No stored connection, stop waiting
@@ -31,6 +35,7 @@ export function WalletConnect() {
     // If connected, stop waiting
     if (isConnected) {
       setWaitingForReconnect(false);
+      setReconnectFailed(false);
       return;
     }
 
@@ -38,10 +43,14 @@ export function WalletConnect() {
     const timeout = setTimeout(() => {
       console.log('[WalletConnect] Reconnect timeout, stopping wait');
       setWaitingForReconnect(false);
+      // Mark reconnect as failed so we can show a quick reconnect option
+      if (!isConnected) {
+        setReconnectFailed(true);
+      }
     }, 2000);
 
     return () => clearTimeout(timeout);
-  }, [mounted, isConnected]);
+  }, [mounted, isConnected, status]);
 
   // Show loading during reconnection
   const isLoading = isReconnecting || isPending || waitingForReconnect;
@@ -131,6 +140,34 @@ export function WalletConnect() {
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
           </svg>
           Reconnecting...
+        </button>
+      </div>
+    );
+  }
+
+  // Show quick reconnect button if reconnect failed
+  if (reconnectFailed && !isConnected) {
+    // Try to get the last used connector from wagmi store
+    const tryQuickReconnect = async () => {
+      console.log('[WalletConnect] Trying quick reconnect...');
+      setReconnectFailed(false);
+      // Try to reconnect with the first available connector
+      const connector = connectors.find(c => c.id !== 'injected') || connectors[0];
+      if (connector) {
+        connect({ connector });
+      }
+    };
+
+    return (
+      <div className="relative">
+        <button
+          onClick={tryQuickReconnect}
+          className="btn-primary py-2 px-4 flex items-center gap-2"
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          Reconnect
         </button>
       </div>
     );
