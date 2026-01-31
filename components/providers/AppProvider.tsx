@@ -2,8 +2,7 @@
 
 import { type ReactNode, useState, useEffect } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { WagmiProvider } from 'wagmi';
-import { reconnect } from '@wagmi/core';
+import { WagmiProvider, useReconnect } from 'wagmi';
 import { config } from '@/lib/wagmi';
 import { FarcasterSDK } from '@/components/FarcasterSDK';
 import { FarcasterWalletConnect } from '@/components/FarcasterWalletConnect';
@@ -14,10 +13,13 @@ interface AppProviderProps {
 
 // Component to handle reconnection on mount
 function WagmiReconnect() {
+  const { reconnect } = useReconnect();
+
   useEffect(() => {
-    // Reconnect to previously connected wallet on page load
-    reconnect(config);
-  }, []);
+    console.log('[WagmiReconnect] Attempting to reconnect...');
+    reconnect();
+  }, [reconnect]);
+
   return null;
 }
 
