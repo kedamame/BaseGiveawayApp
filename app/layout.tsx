@@ -8,7 +8,7 @@ const inter = Inter({ subsets: ['latin'] });
 // Mini App embed configuration
 const miniAppEmbed = {
   version: '1',
-  imageUrl: 'https://base-giveaway-app.vercel.app/icon.png',
+  imageUrl: 'https://base-giveaway-app.vercel.app/og-image.png',
   button: {
     title: 'Create Giveaway',
     action: {
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     title: 'Giveaway App',
     description: 'Token & NFT Lottery on Base',
     type: 'website',
-    images: ['/icon.png'],
+    images: ['/og-image.png'],
   },
   other: {
     'fc:miniapp': JSON.stringify(miniAppEmbed),
