@@ -23,10 +23,11 @@ const connectors = [
   injected({
     shimDisconnect: true,
   }),
-  // Coinbase Wallet for web
+  // Coinbase Wallet — supports both standalone web and Base App browser
   coinbaseWallet({
     appName: 'Giveaway App',
     preference: 'all',
+    appLogoUrl: 'https://base-giveaway-app.vercel.app/icon.png',
   }),
 ];
 

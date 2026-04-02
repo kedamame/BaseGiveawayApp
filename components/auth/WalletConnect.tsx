@@ -10,7 +10,7 @@ export function WalletConnect() {
   const { address, isConnected, isReconnecting, status } = useAccount();
   const { connect, connectors, isPending, error, reset } = useConnect();
   const { disconnect } = useDisconnect();
-  const { isInMiniApp } = useFarcaster();
+  const { isInMiniApp, isInBaseApp } = useFarcaster();
   const [showDropdown, setShowDropdown] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [waitingForReconnect, setWaitingForReconnect] = useState(true);
@@ -234,7 +234,7 @@ export function WalletConnect() {
               <p className="text-sm text-base-gray-400">Connect Wallet</p>
             </div>
             <div className="p-2 max-h-80 overflow-y-auto">
-              {/* Farcaster Wallet - shown in Mini App */}
+              {/* Farcaster Wallet - shown in Farcaster Mini App */}
               {isInMiniApp && (
                 <button
                   onClick={connectFarcasterWallet}
@@ -249,6 +249,12 @@ export function WalletConnect() {
                   </div>
                   <span>Farcaster Wallet</span>
                 </button>
+              )}
+              {/* Base App hint - shown when in Coinbase Wallet browser */}
+              {isInBaseApp && (
+                <div className="px-3 py-2 text-xs text-base-gray-400 border-b border-base-gray-700 mb-1">
+                  Base App detected — Coinbase Wallet recommended
+                </div>
               )}
               {filteredConnectors.map((connector) => (
                 <button
